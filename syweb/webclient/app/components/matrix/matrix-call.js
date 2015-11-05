@@ -332,6 +332,9 @@ function MatrixCallFactory(webRtcService, matrixService, matrixPhoneService, mod
         self.state = 'create_answer';
     };
 
+    //FIXME: Trickleing bypass, remove when ms-edge supports trickleing
+    var lastSdpMLineIndex;
+
     MatrixCall.prototype.gotLocalIceCandidate = function(event) {
         if (event.candidate) {
             console.log("Got local ICE "+event.candidate.sdpMid+" candidate: "+event.candidate.candidate);
@@ -341,7 +344,10 @@ function MatrixCallFactory(webRtcService, matrixService, matrixPhoneService, mod
                 sdpMid: event.candidate.sdpMid,
                 sdpMLineIndex: event.candidate.sdpMLineIndex,
             };
+            lastSdpMLineIndex = event.candidate.sdpMLineIndex;
             this.sendCandidate(c);
+        } else { //FIXME: Trickleing bypass, remove when ms-edge supports trickleing
+            this.sendCandidate({sdpMLineIndex: lastSdpMLineIndex});
         }
     };
 
@@ -351,7 +357,8 @@ function MatrixCallFactory(webRtcService, matrixService, matrixPhoneService, mod
             return;
         }
         console.log("Got remote ICE "+cand.sdpMid+" candidate: "+cand.candidate);
-        this.peerConn.addIceCandidate(webRtcService.newIceCandidate(cand), function() {}, function(e) {});
+        if (cand || $window.RTCIceGatherer) //FIXME: Trickleing bypass, remove when ms-edge supports trickleing
+            this.peerConn.addIceCandidate(webRtcService.newIceCandidate(cand), function() {}, function(e) {});
     };
 
     MatrixCall.prototype.receivedAnswer = function(msg) {

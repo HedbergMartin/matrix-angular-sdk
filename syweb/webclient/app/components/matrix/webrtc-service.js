@@ -29,9 +29,9 @@ angular.module('webRtcService', [])
 
     this.init = function() {
         webRtc.GetUserMedia = $window.navigator.getUserMedia || $window.navigator.webkitGetUserMedia || $window.navigator.mozGetUserMedia;
-        webRtc.RtcPeerConnection = $window.RTCPeerConnection || $window.webkitRTCPeerConnection || $window.mozRTCPeerConnection;
-        webRtc.RtcSessionDescription = $window.RTCSessionDescription || $window.webkitRTCSessionDescription || $window.mozRTCSessionDescription;
-        webRtc.RtcIceCandidate = $window.RTCIceCandidate || $window.webkitRTCIceCandidate || $window.mozRTCIceCandidate;
+        webRtc.RtcPeerConnection = $window.RTCPeerConnection || $window.webkitRTCPeerConnection || $window.mozRTCPeerConnection || $window.ortcRTCPeerConnection;
+        webRtc.RtcSessionDescription = $window.RTCSessionDescription || $window.webkitRTCSessionDescription || $window.mozRTCSessionDescription || $window.ortcRTCSessionDescription;
+        webRtc.RtcIceCandidate = $window.RTCIceCandidate || $window.webkitRTCIceCandidate || $window.mozRTCIceCandidate || $window.ortcRTCIceCandidate;
     };
 
     this.isWebRTCSupported = function () {
@@ -185,13 +185,21 @@ angular.module('webRtcService', [])
     this.getUserMedia = function(constraints, fnSuccess, fnFail) {
         console.log("getUserMedia: "+JSON.stringify(constraints));
         var defer = $q.defer();
-        
-        webRtc.GetUserMedia.call($window.navigator, constraints, function(s) {
-            defer.resolve(s);
-        }, 
-        function(e) {
-            defer.reject(e);
-        });
+
+        if ($window.navigator.mediaDevices) {
+            $window.navigator.mediaDevices.getUserMedia(constraints).then(function(s) {
+                defer.resolve(s);
+            }).catch(function(e) {
+                defer.reject(e);
+            });
+        } else { //FIXME remove when chrome supports navigator.mediaDevices. (Expected in chrome 47)
+            webRtc.GetUserMedia.call($window.navigator, constraints, function(s) {
+                defer.resolve(s);
+            }, 
+            function(e) {
+                defer.reject(e);
+            });
+        }
         
         return defer.promise;
     };
