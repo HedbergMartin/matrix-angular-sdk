@@ -270,7 +270,6 @@
         }
 
         function queuedCreateAnswer(resolve, reject, options) {
-
             if (!remoteSessionInfo) {
                 completeQueuedOperation(function () {
                     reject(createError("InvalidStateError",
@@ -735,6 +734,7 @@
             console.log(candidateAttribute);
             if (!candidateAttribute) {
                 internalAddRemoteIceCandidate(null, candidate.sdpMLineIndex);
+                completeQueuedOperation(resolve);
                 return;
             }
             if (candidateAttribute.substr(0, 2) != "a=")
@@ -773,6 +773,7 @@
             var transport = mediaTransports[mdescIndex];
 
             if (!candidate) {
+                console.log("Adding null candidate");
                 transport.iceTransport.addRemoteCandidate({});
                 return;
             }

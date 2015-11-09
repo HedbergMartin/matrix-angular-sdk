@@ -184,24 +184,20 @@ angular.module('webRtcService', [])
     
     this.getUserMedia = function(constraints, fnSuccess, fnFail) {
         console.log("getUserMedia: "+JSON.stringify(constraints));
-        var defer = $q.defer();
-
+        
         if ($window.navigator.mediaDevices) {
-            $window.navigator.mediaDevices.getUserMedia(constraints).then(function(s) {
-                defer.resolve(s);
-            }).catch(function(e) {
-                defer.reject(e);
-            });
+            return $window.navigator.mediaDevices.getUserMedia(constraints);
         } else { //FIXME remove when chrome supports navigator.mediaDevices. (Expected in chrome 47)
+            var defer = $q.defer();
             webRtc.GetUserMedia.call($window.navigator, constraints, function(s) {
                 defer.resolve(s);
             }, 
             function(e) {
                 defer.reject(e);
             });
-        }
         
-        return defer.promise;
+            return defer.promise;
+        }
     };
     
     this.newIceCandidate = function(cand) {
