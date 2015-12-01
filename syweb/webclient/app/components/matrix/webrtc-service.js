@@ -185,9 +185,9 @@ angular.module('webRtcService', [])
     this.getUserMedia = function(constraints, fnSuccess, fnFail) {
         console.log("getUserMedia: "+JSON.stringify(constraints));
         
-        if ($window.navigator.mediaDevices) {
+        if ($window.navigator.mediaDevices && $window.navigator.mediaDevices.getUserMedia) {
             return $window.navigator.mediaDevices.getUserMedia(constraints);
-        } else { //FIXME remove when chrome supports navigator.mediaDevices. (Expected in chrome 47)
+        } else { //FIXME remove when chrome supports navigator.mediaDevices.getUserMedia. (Expected in chrome 47)
             var defer = $q.defer();
             webRtc.GetUserMedia.call($window.navigator, constraints, function(s) {
                 defer.resolve(s);
